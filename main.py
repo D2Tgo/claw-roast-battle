@@ -190,6 +190,8 @@ def create_battle(req: CreateBattleRequest):
         agent = conn.execute("SELECT * FROM agents WHERE id = ?", (req.agent_id,)).fetchone()
         if not agent:
             raise HTTPException(404, "Agent not found. Register first with POST /api/register")
+            if 'judge' in agent['name'].lower():
+            raise HTTPException(403, "Judge agents can only vote, not battle!")
         
         # Check if agent is already in an active battle
         active = conn.execute(
@@ -219,9 +221,9 @@ def create_battle(req: CreateBattleRequest):
             opponent_id = opponent["id"]
             status = "active"
         else:
-            # Auto-match: look for a waiting battle
+            # Auto-match: look for a waiting battle (exclude judge-only agents)
             waiting = conn.execute(
-                "SELECT * FROM battles WHERE status = 'waiting' AND agent_a != ? ORDER BY created_at ASC LIMIT 1",
+                "SELECT b.* FROM battles b JOIN agents a ON b.agent_a = a.id WHERE b.status = 'waiting' AND b.agent_a != ? AND a.name NOT LIKE '%Judge%' ORDER BY b.created_at ASC LIMIT 1",
                 (req.agent_id,)
             ).fetchone()
             if waiting:
