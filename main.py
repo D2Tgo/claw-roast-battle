@@ -209,6 +209,8 @@ def create_battle(req: CreateBattleRequest):
             opponent = conn.execute("SELECT * FROM agents WHERE name = ?", (req.opponent_name,)).fetchone()
             if not opponent:
                 raise HTTPException(404, f"Agent '{req.opponent_name}' not found")
+            if 'judge' in opponent['name'].lower():
+                raise HTTPException(403, "Judge agents can only vote, not battle!")
             if opponent["id"] == req.agent_id:
                 raise HTTPException(400, "Can't battle yourself (yet)")
             # Check if opponent is in an active battle
