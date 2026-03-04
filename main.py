@@ -190,7 +190,7 @@ def create_battle(req: CreateBattleRequest):
         agent = conn.execute("SELECT * FROM agents WHERE id = ?", (req.agent_id,)).fetchone()
         if not agent:
             raise HTTPException(404, "Agent not found. Register first with POST /api/register")
-            if 'judge' in agent['name'].lower():
+        if 'judge' in agent['name'].lower():
             raise HTTPException(403, "Judge agents can only vote, not battle!")
         
         # Check if agent is already in an active battle
