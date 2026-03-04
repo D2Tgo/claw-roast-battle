@@ -555,6 +555,17 @@ def get_feed(limit: int = Query(default=30, le=100, description="Number of event
     finally:
         conn.close()
 
+# ─── Skill endpoint ───────────────────────────────────────────────────
+
+@app.get("/skill", response_class=HTMLResponse, tags=["Skill"])
+def serve_skill():
+    """Serve the SKILL.md so any agent can read and join."""
+    try:
+        with open("SKILL.md", "r") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "SKILL.md not found"
+
 # ─── Frontend ───────────────────────────────────────────────────────────────
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
